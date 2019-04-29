@@ -1,0 +1,49 @@
+<?xml version="1.0" encoding="UTF-8"?>
+<beans xmlns="http://www.springframework.org/schema/beans"
+	xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xmlns:aop="http://www.springframework.org/schema/aop"
+	xmlns:context="http://www.springframework.org/schema/context"
+	xmlns:mongo="http://www.springframework.org/schema/data/mongo"
+	xsi:schemaLocation="       
+      http://www.springframework.org/schema/context http://www.springframework.org/schema/context/spring-context-3.0.xsd       
+      http://www.springframework.org/schema/beans http://www.springframework.org/schema/beans/spring-beans-3.0.xsd       
+      http://www.springframework.org/schema/tx http://www.springframework.org/schema/tx/spring-tx-3.0.xsd
+      http://www.springframework.org/schema/data/mongo http://www.springframework.org/schema/data/mongo/spring-mongo-1.0.xsd       
+      http://www.springframework.org/schema/aop http://www.springframework.org/schema/aop/spring-aop-3.0.xsd">
+
+      <context:property-placeholder location="classpath:mongo.properties" />
+      
+      <!-- 定义mongo对象 ，对应的是mongodb官方jar包中的Mongo，relica-set设置集群副本的ip地址和端口-->
+      <mongo:mongo id="mongo" host="${mongo.host}" port="${mongo.port}">
+      	<!-- 设置一些链接属性 -->
+      	<mongo:options
+      		connections-per-host="${mongo.connectionsPerHost}"
+      		connect-timeout="${mongo.connectTimeout}"
+      		threads-allowed-to-block-for-connection-multiplier="${mongo.threadsAllowedToBlockForConnectionMutiplier}"
+      		max-wait-time="${mongo.maxWaitTime}"
+      		auto-connect-retry="${mongo.autoConnectRetry}"
+      		socket-keep-alive="${mongo.socketKeepAlive}"
+      		socket-timeout="${mongo.socketTimeout}"
+      		slave-ok="${mongo.slaveOk}"
+      		write-number="1"
+      		write-fsync="true"
+      		write-timeout="0"
+      	
+      	/>
+      </mongo:mongo>
+      
+      <!-- mongo的工厂，通过它来取得mongo的实例，dbname为mongodb的数据库名，没有的话会自动创建 -->
+      <mongo:db-factory dbname="firstDb" mongo-ref="mongo"/>
+      
+      <bean id="mongoTemplate" class="org.springframework.data.mongodb.core.MongoTemplate">
+      	<constructor-arg name="mongoDbFactory" ref="mongoDbFactory"> </constructor-arg>
+      </bean>
+      
+      <!-- 映射转换器 把该包下的实体类转换成mongodb的一个collection的映射 -->
+      <mongo:mapping-converter base-package="com.mym.entity"/>
+      
+      <!-- mongodb的仓库目录，会自动扫描扩展了MongoRepository接口的接口进行注入 -->
+      <mongo:repositories base-package="com.mym.repo"></mongo:repositories>
+      
+      
+      
+ </beans>
